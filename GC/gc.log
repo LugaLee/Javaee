@@ -1,0 +1,87 @@
+# G1 GC LOG
+
+0.522: [GC pause (young), 0.15877971 secs]                                          // 程序运行0.522秒后发生一个Evacuation Pause，耗时0.15877971秒。
+       [Parallel Time: 157.1 ms]                                                    // 并行GC耗时157.1 ms         
+          [GC Worker Start (ms):  522.1  522.2  522.2  522.2                        // 每个工作线程启动时间，时间根据线程id排序
+           Avg: 522.2, Min: 522.1, Max: 522.2, Diff:   0.1]                         // 所有工作线程启动时间的平均值、最小值、最大值、差别
+          [Ext Root Scanning (ms):  1.6  1.5  1.6  1.9                              // 每个扫描root的线程耗时
+           Avg:   1.7, Min:   1.5, Max:   1.9, Diff:   0.4]                         
+          [Update RS (ms):  38.7  38.8  50.6  37.3                                  // 每个执行更新RS（Remembered Sets）的线程的耗时
+           Avg:  41.3, Min:  37.3, Max:  50.6, Diff:  13.3]                         
+             [Processed Buffers : 2 2 3 2                                           // 每个工作线程执行UB（Update Buffers）的数量
+              Sum: 9, Avg: 2, Min: 2, Max: 3, Diff: 1]                              
+          [Scan RS (ms):  9.9  9.7  0.0  9.7                                        // 每个工作线程扫描RS的耗时
+           Avg:   7.3, Min:   0.0, Max:   9.9, Diff:   9.9]                         
+          [Object Copy (ms):  106.7  106.8  104.6  107.9                            // 每个工作线程执行OC（Object Copy）的耗时
+           Avg: 106.5, Min: 104.6, Max: 107.9, Diff:   3.3]                         
+          [Termination (ms):  0.0  0.0  0.0  0.0                                    // 每个工作线程执行终止的耗时
+           Avg:   0.0, Min:   0.0, Max:   0.0, Diff:   0.0]
+             [Termination Attempts : 1 4 4 6                                        // 每个工作线程执行终止的重试的次数
+              Sum: 15, Avg: 3, Min: 1, Max: 6, Diff: 5]
+          [GC Worker End (ms):  679.1  679.1  679.1  679.1                          // 每个工作线程终止时的时间
+           Avg: 679.1, Min: 679.1, Max: 679.1, Diff:   0.1]
+          [GC Worker (ms):  156.9  157.0  156.9  156.9                              // 每个工作线程的生命时间
+           Avg: 156.9, Min: 156.9, Max: 157.0, Diff:   0.1]
+          [GC Worker Other (ms):  0.3  0.3  0.3  0.3                                // 每个工作线程执行其他任务（上述未统计的内容）的耗时
+           Avg:   0.3, Min:   0.3, Max:   0.3, Diff:   0.0]
+       [Clear CT:   0.1 ms]                                                         // 清理CT（Card Table）的耗时
+       [Other:   1.5 ms]                                                            // 其他任务（上述未统计的内容）的耗时
+          [Choose CSet:   0.0 ms]                                                   // 选择分区的耗时
+          [Ref Proc:   0.3 ms]                                                      // 执行关联（Reference objects）的耗时
+          [Ref Enq:   0.0 ms]                                                       // 将references放入ReferenceQueues的耗时
+          [Free CSet:   0.3 ms]                                                     // 释放CS（collection set）的耗时
+       [Eden: 12M(12M)->0B(10M) Survivors: 0B->2048K Heap: 13M(64M)->9739K(64M)]    // Eden容量为12M，使用了12M，GC后变为0，容量目标大小增加到13M。
+                                                                                    // SurvivorsGC前为0，GC后变为2048K
+                                                                                    // GC前，Heap容量为64M，使用13M；GC后，Heap容量为64M，使用9739k。
+     [Times: user=0.59 sys=0.02, real=0.16 secs]
+     
+     
+# CMS GC LOG
+ 
+Minor GC：2016-08-23T02:23:07.219-02001: 64.3222:[GC3(Allocation Failure4) 64.322: [ParNew5: 613404K->68068K6(613440K)7, 0.1020465 secs8] 10885349K->10880154K9(12514816K)10, 0.1021309 secs11][Times: user=0.78 sys=0.01, real=0.11 secs]12
+
+  2016-08-23T02:23:07.219-0200 – GC发生的时间；
+  64.322 – GC开始，相对JVM启动的相对时间，单位是秒；
+  GC – 区别MinorGC和FullGC的标识，这次代表的是MinorGC;
+  Allocation Failure – MinorGC的原因，在这个case里边，由于年轻代不满足申请的空间，因此触发了MinorGC;
+  ParNew – 收集器的名称，它预示了年轻代使用一个并行的 mark-copy stop-the-world 垃圾收集器；
+  613404K->68068K – 收集前后年轻代的使用情况；
+  (613440K) – 整个年轻代的容量；
+  0.1020465 secs – 这个解释用原滋原味的解释：Duration for the collection w/o final cleanup.
+  10885349K->10880154K – 收集前后整个堆的使用情况；
+  (12514816K) – 整个堆的容量；
+  0.1021309 secs – ParNew收集器标记和复制年轻代活着的对象所花费的时间（包括和老年代通信的开销、对象晋升到老年代时间、垃圾收集周期结束一些最后的清理对象等的花销）；
+  [Times: user=0.78 sys=0.01, real=0.11 secs] – GC事件在不同维度的耗时，具体的用英文解释起来更加合理:
+  user – Total CPU time that was consumed by Garbage Collector threads during this collection
+  sys – Time spent in OS calls or waiting for system event
+  real – Clock time for which your application was stopped. With Parallel GC this number should be close to (user time + system time) divided by the number of threads used by the Garbage Collector. In this particular case 8 threads were used. Note that due to some activities not being parallelizable, it always exceeds the ratio by a certain amount.
+FULL GC：2016-08-23T11:23:07.321-0200: 64.421: [GC (CMS Initial Mark2[1 CMS-initial-mark: 10812086K3(11901376K)4] 10887844K5(12514816K)6, 0.0001997 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]7
+
+  016-08-23T11:23:07.321-0200: 64.42 – GC事件开始，包括时钟时间和相对JVM启动时候的相对时间，下边所有的阶段改时间的含义相同；
+  CMS Initial Mark – 收集阶段，开始收集所有的GC Roots和直接引用到的对象；
+  10812086K – 当前老年代使用情况；
+  (11901376K) – 老年代可用容量；
+  10887844K – 当前整个堆的使用情况；
+  (12514816K) – 整个堆的容量；
+  0.0001997 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] – 时间计量；
+  
+# -XX:+UseSerialGC窜行GC
+2015-05-26T14:45:37.987-02001:151.1262:[GC3(Allocation Failure4)
+151.126: [DefNew5:629119K->69888K6(629120K)7
+, 0.0584157 secs]1619346K->1273247K8(2027264K)9,0.0585007 secs10]
+[Times: user=0.06 sys=0.00, real=0.06 secs]11
+
+  2015-05-26T14:45:37.987-0200 – GC事件(GC event)开始的时间点.
+  151.126 – GC时间的开始时间,相对于JVM的启动时间,单位是秒(Measured in seconds).
+  GC – 用来区分(distinguish)是 Minor GC 还是 Full GC 的标志(Flag). 这里的 GC 表明本次发生的是 Minor GC.
+  Allocation Failure – 引起垃圾回收的原因. 本次GC是因为年轻代中没有任何合适的区域能够存放需要分配的数据结构而触发的.
+  DefNew – 使用的垃圾收集器的名字. DefNew 这个名字代表的是: 单线程(single-threaded), 采用标记复制(mark-copy)算法的, 使整个JVM暂停运行(stop-the-world)的年轻代(Young generation) 垃圾收集器(garbage collector).
+  629119K->69888K – 在本次垃圾收集之前和之后的年轻代内存使用情况(Usage).
+  (629120K) – 年轻代的总的大小(Total size).
+  1619346K->1273247K – 在本次垃圾收集之前和之后整个堆内存的使用情况(Total used heap).
+  (2027264K) – 总的可用的堆内存(Total available heap).
+  0.0585007 secs – GC事件的持续时间(Duration),单位是秒.
+  [Times: user=0.06 sys=0.00, real=0.06 secs] – GC事件的持续时间,通过多种分类来进行衡量: 
+  user – 此次垃圾回收, 垃圾收集线程消耗的所有CPU时间(Total CPU time).
+  sys – 操作系统调用(OS call) 以及等待系统事件的时间(waiting for system event)
+  real – 应用程序暂停的时间(Clock time). 由于串行垃圾收集器(Serial Garbage Collector)只会使用单个线程, 所以 real time 等于 user 以及 system time 的总和.
